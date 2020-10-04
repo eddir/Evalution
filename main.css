@@ -12,11 +12,10 @@ table {
     table-layout:fixed;
 }
 tr {
-    height: 30px;
+    height: 35px;
 }
 td {
-    min-width: 40px;
-    border: solid #cfcfcf 1px;
+    min-width: 43px;
 }
 .board, .board th, .board td {
   border: 0;
@@ -27,7 +26,6 @@ td {
     background: url(assets/textures.svg) no-repeat 0 0;
     background-size: 324px;
     cursor: pointer;
-    display: block;
 }
 .creature-leaf {
     background-position: -78px 0;
@@ -39,13 +37,13 @@ td {
     background-position: -121px 0;
 }
 .creature3 {
-    background-position: -163px 0;
+    background-position: -162px 0;
 }
 .creature4 {
     background-position: -203px 0;
 }
 .creature5 {
-    background-position: -241px 0;
+    background-position: -240px 0;
 }
 .creature6 {
     background-position: -284px 0;
@@ -54,7 +52,7 @@ td {
     background-position: -41px -41px;
 }
 .creature8 {
-    background-position: -82px -41px;
+    background-position: -81px -41px;
 }
 .creature11 {
     background-position: -122px -41px;
@@ -63,7 +61,7 @@ td {
     background-position: -163px -41px;
 }
 .creature13 {
-    background-position: -203px -41px;
+    background-position: -202px -41px;
 }
 .creature14 {
     background-position: -241px -41px;

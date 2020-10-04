@@ -1,5 +1,6 @@
 let width, height, goods_random, news_limit, spawn_limit, period, alphabit;
 
+enabled = 1;
 width = height = 20;
 goods_random = 100;
 spawn_random = 100;
@@ -17,8 +18,90 @@ for (let i = 0; i < height; i++) {
     }
 }
 
+player = {
+    x: width / 2 | 0,
+    y: height / 2 | 0,
+    entity: {
+        name: name++,
+        type: "player",
+        status: 3,
+        parents: [0, 0],
+        points: 10,
+        age: 0,
+        eye: 1,
+        gen: getRandomInt(10),
+        step: 1,
+        hungry: 0,
+        endurance: 0,
+        power: 0,
+        skin: 15
+    }
+};
+area[player['y']][player['x']] = player['entity'];
+
 tick();
-setInterval(tick, period);
+var interval = setInterval(tick, period);
+
+document.addEventListener('keypress', (event) => {
+    let px = player['x'];
+    let py = player['y'];
+    switch (event.key) {
+        case "w": //движение вперёд
+            console.log(player);
+            if (player['x'] !== 0) {
+                player['x']--;
+                moveCreation([px, py], [player['x'], player['y']], 1);
+                draw();
+            }
+            break;
+        case "s": //движение назад
+            if (player['x'] !== height) {
+                player['x']++;
+                moveCreation([px, py], [player['x'], player['y']], 1);
+                draw();
+            }
+            break;
+        case "a": //движение влево
+            if (player['y'] !== 0) {
+                player['y']--;
+                moveCreation([px, py], [player['x'], player['y']], 1);
+                draw();
+            }
+            break;
+        case "d": //движение вправо
+            if (player['y'] !== width) {
+                player['y']++;
+                moveCreation([px, py], [player['x'], player['y']], 1);
+                draw();
+            }
+            break;
+        case "p": //пауза\продолжить
+            if (enabled) {
+                clearInterval(interval);
+                enabled = 0;
+                console.log("Paused");
+            } else {
+                interval = setInterval(tick, period);
+                enabled = 1;
+                console.log("Resumed");
+            }
+            break;
+        case "f": //тик быстрее
+            if (period > 100) {
+                period -= 100;
+                clearInterval(interval);
+                interval = setInterval(tick, period);
+                console.log("Changed period to " + period);
+            }
+            break;
+        case "l": //тик медленее
+            period += 100;
+            clearInterval(interval);
+            interval = setInterval(tick, period);
+            console.log("Changed period to " + period);
+            break;
+    }
+});
 
 function tick() {
     steps();
@@ -55,7 +138,7 @@ function spawn() {
             hungry: 0,
             endurance: 0,
             power: 0,
-            skin: getRandomInt(15)
+            skin: getRandomInt(14)
         };
         broadCastResurrection(area[y][x]);
     }
@@ -145,7 +228,7 @@ function loving(x, y, creation) {
                         type: "creation",
                         points: Math.ceil((area[vx][vy]['points']) / 4),
                         age: 0,
-                        eye: Math.floor((area[vx][vy]['eye'] + area[x][y]['points'])/2),
+                        eye: Math.floor((area[vx][vy]['eye'] + area[x][y]['points']) / 2),
                         gen: area[x][y]['gen'],
                         step: 1,
                         hungry: 0,
@@ -189,13 +272,13 @@ function fighting(x, y, creation) {
             let vy = environment[i][1];
 
             if ((area[x][y]['power'] + area[x][y]['points']) > (area[vx][vy]['power'] + area[vx][vy]['points'])) {
-                broadCastDeath(area[x][y]['name'], area[vx][vy]['name']);
+                broadCastDeath(area[x][y], area[vx][vy]);
                 area[x][y]['points'] += area[vx][vy]['points'];
                 area[x][y]['power'] = Math.floor(getRandomInt(110) / 100 * area[x][y]['power']);
                 moveCreation([x, y], [vx, vy], radius);
                 area[x][y]['status'] = 2;
             } else {
-                broadCastDeath(area[vx][vy]['name'], area[x][y]['name']);
+                broadCastDeath(area[vx][vy], area[x][y]);
                 area[vx][vy]['points'] += area[x][y]['points'];
                 area[vx][vy]['power'] = Math.floor(getRandomInt(150) / 100 * area[vx][vy]['power']);
                 area[x][y] = {type: "empty"};
@@ -208,7 +291,7 @@ function fighting(x, y, creation) {
 }
 
 function broadCastResurrection(creation) {
-    document.getElementById("news").innerHTML = "<div><h2>Божественно</h2><p>Имя: " + creation['name'].toString(alphabit) +
+    document.getElementById("news").innerHTML = "<div><h2>Новое существо</h2><p>Имя: " + creation['name'].toString(alphabit) +
         "<br>Родители: " + creation['parents'][0].toString(alphabit) + ", " + creation['parents'][1].toString(alphabit) + "<br>Зрение: " + creation['eye'] +
         "<br>Выносливость: " + creation['endurance'] + "<br>Ген: " + creation['gen'] +
         "<br>Всего существ: " + countCreations() + "</p><hr></div>" + document.getElementById("news").innerHTML;
@@ -217,8 +300,11 @@ function broadCastResurrection(creation) {
 
 
 function broadCastDeath(killer, victim) {
-    document.getElementById("news").innerHTML = "<div><h2>Смерть</h2><p>Убит: " + victim.toString(alphabit) +
-        "<br>Убийца: " + killer.toString(alphabit) +  "<br>Всего существ: " + countCreations() + "</p><hr></div>" + document.getElementById("news").innerHTML;
+    if (victim['type'] === "player") {
+        alert("смэрть");
+    }
+    document.getElementById("news").innerHTML = "<div><h2>Смерть</h2><p>Убит: " + victim['name'].toString(alphabit) +
+        "<br>Убийца: " + killer['name'].toString(alphabit) + "<br>Всего существ: " + countCreations() + "</p><hr></div>" + document.getElementById("news").innerHTML;
     limitNews();
 }
 
