@@ -1,0 +1,73 @@
+body {
+    background-color: #edebcc;
+}
+#area {
+    display: table;
+    margin: 0 auto;
+}
+table {
+    text-align: center;
+    font-size: 30px;
+    overflow: scroll;
+    table-layout:fixed;
+}
+tr {
+    height: 30px;
+}
+td {
+    min-width: 40px;
+    border: solid #cfcfcf 1px;
+}
+.board, .board th, .board td {
+  border: 0;
+}
+.creature {
+    width: 43px;
+    height: 35px;
+    background: url(assets/textures.svg) no-repeat 0 0;
+    background-size: 324px;
+    cursor: pointer;
+    display: block;
+}
+.creature-leaf {
+    background-position: -78px 0;
+}
+.creature1 {
+    background-position: -41px 0;
+}
+.creature2 {
+    background-position: -121px 0;
+}
+.creature3 {
+    background-position: -163px 0;
+}
+.creature4 {
+    background-position: -203px 0;
+}
+.creature5 {
+    background-position: -241px 0;
+}
+.creature6 {
+    background-position: -284px 0;
+}
+.creature7 {
+    background-position: -41px -41px;
+}
+.creature8 {
+    background-position: -82px -41px;
+}
+.creature11 {
+    background-position: -122px -41px;
+}
+.creature12 {
+    background-position: -163px -41px;
+}
+.creature13 {
+    background-position: -203px -41px;
+}
+.creature14 {
+    background-position: -241px -41px;
+}
+.creature15 {
+    background-position: -284px -41px;
+}

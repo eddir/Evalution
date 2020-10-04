@@ -2,6 +2,7 @@ let width, height, goods_random, news_limit, spawn_limit, period, alphabit;
 
 width = height = 20;
 goods_random = 100;
+spawn_random = 100;
 news_limit = 50;
 spawn_limit = 20;
 period = 2000;
@@ -16,6 +17,7 @@ for (let i = 0; i < height; i++) {
     }
 }
 
+tick();
 setInterval(tick, period);
 
 function tick() {
@@ -26,7 +28,7 @@ function tick() {
 }
 
 function spawn() {
-    if (name < spawn_limit && getRandomInt(100) < 16) {
+    if (name < spawn_limit && getRandomInt(100) < spawn_random) {
         let x = getRandomInt(width);
         let y = getRandomInt(height);
         while (area[y][x]['type'] !== "empty") {
@@ -52,7 +54,8 @@ function spawn() {
             step: 1,
             hungry: 0,
             endurance: 0,
-            power: 0
+            power: 0,
+            skin: getRandomInt(15)
         };
         broadCastResurrection(area[y][x]);
     }
@@ -296,7 +299,7 @@ function fillGoods() {
 }
 
 function draw() {
-    let html = "<table><tbody>";
+    let html = "<table class='board'><tbody>";
     let colors = ["#ffffff", "#00ff11", "#ff5500", "#ffff00"];
     for (let i = 0; i < height; i++) {
         html += "<tr>";
@@ -304,12 +307,12 @@ function draw() {
             if (area[i][k]['type'] === "empty") {
                 html += "<td>&nbsp;</td>";
             } else if (area[i][k]['type'] === "point") {
-                html += "<td>*</td>";
+                html += "<td class='creature creature-leaf'></td>";
             } else {
-                html += "<td style='background-color: " + colors[area[i][k]['status']] + ";' title='" + area[i][k]['name'].toString(alphabit) + "\nРодители: " + area[i][k]['parents'][0].toString(alphabit) + ", " +
+                html += "<td class='creature creature" + area[i][k]['skin'] + "' title='" + area[i][k]['name'].toString(alphabit) + "\nРодители: " + area[i][k]['parents'][0].toString(alphabit) + ", " +
                     area[i][k]['parents'][1].toString(alphabit) + "\nВозраст: " + area[i][k]['age'] + "\nЗрение: " + area[i][k]['eye'] + "\nГолод: " +
                     area[i][k]['hungry'] + "" + "\nВыносливость: " + area[i][k]['endurance'] + "\nСила: " + area[i][k]['power'] +
-                    "\nГен: " + area[i][k]['gen'] + "'>" + area[i][k]['points'] + "</td>";
+                    "\nГен: " + area[i][k]['gen'] + "'><span></span></td>";
             }
         }
         html += "</tr>";
