@@ -47,29 +47,28 @@ document.addEventListener('keypress', (event) => {
     let py = player['y'];
     switch (event.key) {
         case "w": //движение вперёд
-            console.log(player);
-            if (player['x'] !== 0) {
+            if (enabled && player['x'] !== 0) {
                 player['x']--;
                 moveCreation([px, py], [player['x'], player['y']], 1);
                 draw();
             }
             break;
         case "s": //движение назад
-            if (player['x'] !== height) {
+            if (enabled && player['x'] !== height - 1) {
                 player['x']++;
                 moveCreation([px, py], [player['x'], player['y']], 1);
                 draw();
             }
             break;
         case "a": //движение влево
-            if (player['y'] !== 0) {
+            if (enabled && player['y'] !== 0) {
                 player['y']--;
                 moveCreation([px, py], [player['x'], player['y']], 1);
                 draw();
             }
             break;
         case "d": //движение вправо
-            if (player['y'] !== width) {
+            if (enabled && player['y'] !== width - 1) {
                 player['y']++;
                 moveCreation([px, py], [player['x'], player['y']], 1);
                 draw();
@@ -77,17 +76,15 @@ document.addEventListener('keypress', (event) => {
             break;
         case "p": //пауза\продолжить
             if (enabled) {
-                clearInterval(interval);
-                enabled = 0;
+                stopGame();
                 console.log("Paused");
             } else {
-                interval = setInterval(tick, period);
-                enabled = 1;
+                resumeGame();
                 console.log("Resumed");
             }
             break;
         case "f": //тик быстрее
-            if (period > 100) {
+            if (enabled && period > 100) {
                 period -= 100;
                 clearInterval(interval);
                 interval = setInterval(tick, period);
@@ -95,10 +92,12 @@ document.addEventListener('keypress', (event) => {
             }
             break;
         case "l": //тик медленее
-            period += 100;
-            clearInterval(interval);
-            interval = setInterval(tick, period);
-            console.log("Changed period to " + period);
+            if (enabled) {
+                period += 100;
+                clearInterval(interval);
+                interval = setInterval(tick, period);
+                console.log("Changed period to " + period);
+            }
             break;
     }
 });
@@ -108,6 +107,16 @@ function tick() {
     spawn();
     fillGoods();
     draw();
+}
+
+function stopGame() {
+    clearInterval(interval);
+    enabled = 0;
+}
+
+function resumeGame() {
+    interval = setInterval(tick, period);
+    enabled = 1;
 }
 
 function spawn() {
@@ -267,7 +276,7 @@ function fighting(x, y, creation) {
     creation['eye'] <= creation['step'] ? radius = creation['eye'] : radius = creation['step'];
     let environment = shuffle(getAround(x, y, radius));
     for (let i = 0; i < environment.length; i++) {
-        if (area[environment[i][0]][environment[i][1]]['type'] === "creation") {
+        if (area[environment[i][0]][environment[i][1]]['type'] === "creation" || area[environment[i][0]][environment[i][1]]['type'] === "player") {
             let vx = environment[i][0];
             let vy = environment[i][1];
 
@@ -301,7 +310,8 @@ function broadCastResurrection(creation) {
 
 function broadCastDeath(killer, victim) {
     if (victim['type'] === "player") {
-        alert("смэрть");
+        stopGame();
+        console.log("Game over")
     }
     document.getElementById("news").innerHTML = "<div><h2>Смерть</h2><p>Убит: " + victim['name'].toString(alphabit) +
         "<br>Убийца: " + killer['name'].toString(alphabit) + "<br>Всего существ: " + countCreations() + "</p><hr></div>" + document.getElementById("news").innerHTML;
