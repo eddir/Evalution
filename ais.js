@@ -5,36 +5,36 @@ let area = [[]], name = 0x1;
 document.addEventListener('keypress', (event) => {
     let px = player['x'];
     let py = player['y'];
-    switch (event.key) {
-        case "w": //движение вперёд
+    switch (event.code) {
+        case "KeyW": //движение вперёд
             if (enabled && player['x'] !== 0) {
                 player['x']--;
                 moveCreation([px, py], [player['x'], player['y']], 1);
                 draw();
             }
             break;
-        case "s": //движение назад
+        case "KeyS": //движение назад
             if (enabled && player['x'] !== height - 1) {
                 player['x']++;
                 moveCreation([px, py], [player['x'], player['y']], 1);
                 draw();
             }
             break;
-        case "a": //движение влево
+        case "KeyA": //движение влево
             if (enabled && player['y'] !== 0) {
                 player['y']--;
                 moveCreation([px, py], [player['x'], player['y']], 1);
                 draw();
             }
             break;
-        case "d": //движение вправо
+        case "KeyD": //движение вправо
             if (enabled && player['y'] !== width - 1) {
                 player['y']++;
                 moveCreation([px, py], [player['x'], player['y']], 1);
                 draw();
             }
             break;
-        case "p": //пауза\продолжить
+        case "KeyP": //пауза\продолжить
             if (enabled) {
                 stopGame();
                 console.log("Paused");
@@ -43,7 +43,7 @@ document.addEventListener('keypress', (event) => {
                 console.log("Resumed");
             }
             break;
-        case "f": //тик быстрее
+        case "KeyF": //тик быстрее
             if (enabled && period > 100) {
                 period -= 100;
                 clearInterval(interval);
@@ -51,7 +51,7 @@ document.addEventListener('keypress', (event) => {
                 console.log("Changed period to " + period);
             }
             break;
-        case "l": //тик медленее
+        case "KeyL": //тик медленее
             if (enabled) {
                 period += 100;
                 clearInterval(interval);
