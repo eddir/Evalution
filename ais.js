@@ -1,34 +1,34 @@
 let enabled, width, height, goods_random, spawn_random, news_limit, spawn_limit, period, alphabet, interval, player;
 
-let area = [[]], name = 0x1;
+let area = [[]], name = 0x1, stat_food = 0, stat_kill = 0;
 
 document.addEventListener('keypress', (event) => {
     let px = player['x'];
     let py = player['y'];
     switch (event.code) {
         case "KeyW": //движение вперёд
-            if (enabled && player['x'] !== 0) {
+            if (enabled && player['x'] !== 0 && playerMovement(player['x'] - 1, player['y'])) {
                 player['x']--;
                 moveCreation([px, py], [player['x'], player['y']], 1);
                 draw();
             }
             break;
         case "KeyS": //движение назад
-            if (enabled && player['x'] !== height - 1) {
+            if (enabled && player['x'] !== height - 1 && playerMovement(player['x'] + 1, player['y'])) {
                 player['x']++;
                 moveCreation([px, py], [player['x'], player['y']], 1);
                 draw();
             }
             break;
         case "KeyA": //движение влево
-            if (enabled && player['y'] !== 0) {
+            if (enabled && player['y'] !== 0 && playerMovement(player['x'], player['y'] - 1)) {
                 player['y']--;
                 moveCreation([px, py], [player['x'], player['y']], 1);
                 draw();
             }
             break;
         case "KeyD": //движение вправо
-            if (enabled && player['y'] !== width - 1) {
+            if (enabled && player['y'] !== width - 1 && playerMovement(player['x'], player['y'] + 1)) {
                 player['y']++;
                 moveCreation([px, py], [player['x'], player['y']], 1);
                 draw();
@@ -62,6 +62,18 @@ document.addEventListener('keypress', (event) => {
     }
 });
 
+function playerMovement(px, py) {
+    if (area[px][py]['type'] === 'point') {
+        player['entity']['hungry'] = 0;
+        stat_food++;
+        broadCastPlayerEat();
+    } else if (area[px][py]['type'] === 'creation') {
+        stat_kill++;
+        return fighting(px, py, player['entity']);
+    }
+    return true;
+}
+
 function tick() {
     steps();
     spawn();
@@ -93,7 +105,7 @@ function startGame() {
         x: width / 2 | 0,
         y: height / 2 | 0,
         entity: {
-            name: name++,
+            name: "Игрок",
             type: "player",
             status: 3,
             parents: [0, 0],
@@ -140,7 +152,7 @@ function spawn() {
             }
         }
         area[y][x] = {
-            name: name++,
+            name: (name++).toString(alphabet),
             type: "creation",
             status: 3,
             parents: [0, 0],
@@ -163,6 +175,9 @@ function steps() {
     for (let i = 0; i < creatures.length; i++) {
         doStep(creatures[i][0], creatures[i][1])
     }
+
+    player['entity']['age']++;
+    player['entity']['hungry']++;
 }
 
 function doStep(x, y) {
@@ -304,28 +319,45 @@ function fighting(x, y, creation) {
     return false;
 }
 
+function broadCastPlayerEat() {
+    document.getElementById("news").innerHTML = "<div><h2>Голод устранён</h2><hr></div>" + document.getElementById("news").innerHTML;
+    limitNews();
+}
+
 function broadCastResurrection(creation) {
-    document.getElementById("news").innerHTML = "<div><h2>Новое существо</h2><p>Имя: #" + creation['name'].toString(alphabet) +
-        "<br>Родители: #" + creation['parents'][0].toString(alphabet) + ", #" + creation['parents'][1].toString(alphabet) + "<br>Зрение: " + creation['eye'] +
+    document.getElementById("news").innerHTML = "<div><h2>Новое существо</h2><p>Имя: #" + creation['name'] +
+        "<br>Родители: #" + creation['parents'][0] + ", #" + creation['parents'][1] + "<br>Зрение: " + creation['eye'] +
         "<br>Выносливость: " + creation['endurance'] + "<br>Ген: " + creation['gen'] +
         "<br>Всего существ: " + countCreations() + "</p><hr></div>" + document.getElementById("news").innerHTML;
     limitNews();
 }
 
-
 function broadCastDeath(killer, victim) {
     if (victim['type'] === "player") {
         stopGame();
-        console.log("Game over")
+        stat_kill--;
+        document.getElementById("finish").style.display = 'block';
+        document.getElementById("welcome").style.display = 'none';
+        document.getElementById("area").style.display = 'none';
+        document.getElementById("finish").innerHTML = "<h1>Поражение</h1><p>Возраст: " + player['entity']['age'] + "</p><p>Съедено: " + stat_food + "</p><p>Убито: " + stat_kill + "</p>";
     }
-    document.getElementById("news").innerHTML = "<div><h2>Смерть</h2><p>Убит: " + victim['name'].toString(alphabet) +
-        "<br>Убийца: " + killer['name'].toString(alphabet) + "<br>Всего существ: " + countCreations() + "</p><hr></div>" + document.getElementById("news").innerHTML;
+    document.getElementById("news").innerHTML = "<div><h2>Смерть</h2><p>Убит: " + victim['name'] +
+        "<br>Убийца: " + killer['name'] + "<br>Всего существ: " + countCreations() + "</p><hr></div>" + document.getElementById("news").innerHTML;
+
+    if (countCreations() === 0) {
+        stopGame();
+        document.getElementById("finish").style.display = 'block';
+        document.getElementById("welcome").style.display = 'none';
+        document.getElementById("area").style.display = 'none';
+        document.getElementById("finish").innerHTML = "<h1>j,tlf</h1><p>Возраст: " + player['entity']['age'] + "</p><p>Съедено: " + stat_food + "</p><p>Убито: " + stat_kill + "</p>";
+    }
+
     limitNews();
 }
 
 function broadCastBirth(creation) {
-    document.getElementById("news").innerHTML = "<div><h2>Рождение</h2><p>Имя: " + creation['name'].toString(alphabet) +
-        "<br>Родители: " + creation['parents'][0].toString(alphabet) + ", " + creation['parents'][1].toString(alphabet) + "<br>Зрение: " + creation['eye'] +
+    document.getElementById("news").innerHTML = "<div><h2>Рождение</h2><p>Имя: " + creation['name'] +
+        "<br>Родители: " + creation['parents'][0] + ", " + creation['parents'][1] + "<br>Зрение: " + creation['eye'] +
         "<br>Выносливость: " + creation['endurance'] + "<br>Ген: " + creation['gen'] +
         "<br>Всего существ: " + countCreations() + "</p><hr></div>" + document.getElementById("news").innerHTML;
     limitNews();
@@ -410,8 +442,8 @@ function draw() {
             } else if (area[i][k]['type'] === "point") {
                 html += "<td class='creature creature-leaf'></td>";
             } else {
-                html += "<td class='creature creature" + area[i][k]['skin'] + "' title='" + area[i][k]['name'].toString(alphabet) + "\nРодители: " + area[i][k]['parents'][0].toString(alphabet) + ", " +
-                    area[i][k]['parents'][1].toString(alphabet) + "\nВозраст: " + area[i][k]['age'] + "\nЗрение: " + area[i][k]['eye'] + "\nГолод: " +
+                html += "<td class='creature creature" + area[i][k]['skin'] + "' title='" + area[i][k]['name'] + "\nРодители: " + area[i][k]['parents'][0] + ", " +
+                    area[i][k]['parents'][1] + "\nВозраст: " + area[i][k]['age'] + "\nЗрение: " + area[i][k]['eye'] + "\nГолод: " +
                     area[i][k]['hungry'] + "" + "\nВыносливость: " + area[i][k]['endurance'] + "\nСила: " + area[i][k]['power'] +
                     "\nГен: " + area[i][k]['gen'] + "'><span></span></td>";
             }
