@@ -2,13 +2,63 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Experiment</title>
+    <title>Evolution</title>
     <link rel="stylesheet" href="main.css">
 </head>
 <body>
-    <div id="area"></div>
+<div id="area"></div>
+<div id="welcome">
+    <h1>Evolution</h1>
+    <p>Добро пожаловать в игровой симулятор "Evolution"!</p>
+    <p>На данной странице Вы познакомитесь с основными принципами дарвинизма - направление эволюционной мысли,
+        приверженцы которого согласны с основными идеями Дарвина в вопросе эволюции, согласно которым
+        главным (хотя и не единственным) фактором эволюции является естественный отбор. В процессе развития существа
+        приобретают качества, специфичные в привычных для них условиях выживания.</p>
+    <p>Вы управляете собственным существом, находящимся в начале в центре игровой арены и стремящемся выжать в
+        непростых условиях игрового мира. Ваши задачи - собирать еду или убивать врагов, в зависимости от выбранной Вами
+        тактики развития. Перемещайтесь клавишами <b>w</b>,<b>a</b>,<b>s</b>,<b>d</b>. Остерегайтесь врагов, сильнее
+        Вас. Не стойте долго на одном
+        месте, иначе потеряете способность быстро перемещаться. Не допускайте голод.</p>
+    <p>Удачи!</p>
+    <p><a class="start" onclick="startGame()">Старт</a></p>
+    <h2>Настройки</h2>
+    <div>
+        <label for="width">Ширина поля, клеток:</label>
+        <input type="number" id="width" value="20">
+    </div>
+    <div>
+        <label for="height">Высота поля, клеток:</label>
+        <input type="number" id="height" value="20">
+    </div>
+    <div>
+        <label for="goods_random">Частота появления пищи, %:</label>
+        <input type="number" id="goods_random" value="100">
+    </div>
+    <div>
+        <label for="spawn_random">Частота появления существ, %:</label>
+        <input type="number" id="spawn_random" value="100">
+    </div>
+    <div>
+        <label for="news_limit">Количество выводимых новостей:</label>
+        <input type="number" id="news_limit" value="50">
+    </div>
+    <div>
+        <label for="spawn_limit">Максимальное число новых существ:</label>
+        <input type="number" id="spawn_limit" value="20">
+    </div>
+    <div>
+        <label for="period">Время одного тика, мс:</label>
+        <input type="number" id="period" value="2000">
+    </div>
+    <div>
+        <label for="alphabet">Альфавит:</label>
+        <input type="number" id="alphabet" value="36">
+    </div>
+</div>
+<div id="news_block" class="hidden">
     <h1>События</h1>
     <div id="news"></div>
-    <script src="ais.js"></script>
+</div>
+<script src="ais.js"></script>
 </body>
 </html>

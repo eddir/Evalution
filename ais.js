@@ -1,46 +1,6 @@
-let width, height, goods_random, news_limit, spawn_limit, period, alphabit;
-
-enabled = 1;
-width = height = 20;
-goods_random = 100;
-spawn_random = 100;
-news_limit = 50;
-spawn_limit = 20;
-period = 2000;
-alphabit = 36;
+let enabled, width, height, goods_random, spawn_random, news_limit, spawn_limit, period, alphabet, interval, player;
 
 let area = [[]], name = 0x1;
-
-for (let i = 0; i < height; i++) {
-    area[i] = [];
-    for (let k = 0; k < width; k++) {
-        area[i][k] = {type: "empty"};
-    }
-}
-
-player = {
-    x: width / 2 | 0,
-    y: height / 2 | 0,
-    entity: {
-        name: name++,
-        type: "player",
-        status: 3,
-        parents: [0, 0],
-        points: 10,
-        age: 0,
-        eye: 1,
-        gen: getRandomInt(10),
-        step: 1,
-        hungry: 0,
-        endurance: 0,
-        power: 0,
-        skin: 15
-    }
-};
-area[player['y']][player['x']] = player['entity'];
-
-tick();
-var interval = setInterval(tick, period);
 
 document.addEventListener('keypress', (event) => {
     let px = player['x'];
@@ -109,12 +69,57 @@ function tick() {
     draw();
 }
 
+function startGame() {
+    width = document.getElementById("width").getAttribute("value");
+    height = document.getElementById("height").getAttribute("value");
+    goods_random = document.getElementById("goods_random").getAttribute("value");
+    spawn_random = document.getElementById("spawn_random").getAttribute("value");
+    news_limit = document.getElementById("news_limit").getAttribute("value");
+    spawn_limit = document.getElementById("spawn_limit").getAttribute("value");
+    period = document.getElementById("period").getAttribute("value");
+    alphabet = document.getElementById("alphabet").getAttribute("value");
+
+    document.getElementById("welcome").hidden = true;
+    document.getElementById("news_block").classList.remove("hidden");
+
+    for (let i = 0; i < height; i++) {
+        area[i] = [];
+        for (let k = 0; k < width; k++) {
+            area[i][k] = {type: "empty"};
+        }
+    }
+
+    player = {
+        x: width / 2 | 0,
+        y: height / 2 | 0,
+        entity: {
+            name: name++,
+            type: "player",
+            status: 3,
+            parents: [0, 0],
+            points: 10,
+            age: 0,
+            eye: 1,
+            gen: getRandomInt(10),
+            step: 1,
+            hungry: 0,
+            endurance: 0,
+            power: 0,
+            skin: 15
+        }
+    };
+    area[player['y']][player['x']] = player['entity'];
+
+    resumeGame();
+}
+
 function stopGame() {
     clearInterval(interval);
     enabled = 0;
 }
 
 function resumeGame() {
+    tick();
     interval = setInterval(tick, period);
     enabled = 1;
 }
@@ -300,8 +305,8 @@ function fighting(x, y, creation) {
 }
 
 function broadCastResurrection(creation) {
-    document.getElementById("news").innerHTML = "<div><h2>Новое существо</h2><p>Имя: " + creation['name'].toString(alphabit) +
-        "<br>Родители: " + creation['parents'][0].toString(alphabit) + ", " + creation['parents'][1].toString(alphabit) + "<br>Зрение: " + creation['eye'] +
+    document.getElementById("news").innerHTML = "<div><h2>Новое существо</h2><p>Имя: #" + creation['name'].toString(alphabet) +
+        "<br>Родители: #" + creation['parents'][0].toString(alphabet) + ", #" + creation['parents'][1].toString(alphabet) + "<br>Зрение: " + creation['eye'] +
         "<br>Выносливость: " + creation['endurance'] + "<br>Ген: " + creation['gen'] +
         "<br>Всего существ: " + countCreations() + "</p><hr></div>" + document.getElementById("news").innerHTML;
     limitNews();
@@ -313,14 +318,14 @@ function broadCastDeath(killer, victim) {
         stopGame();
         console.log("Game over")
     }
-    document.getElementById("news").innerHTML = "<div><h2>Смерть</h2><p>Убит: " + victim['name'].toString(alphabit) +
-        "<br>Убийца: " + killer['name'].toString(alphabit) + "<br>Всего существ: " + countCreations() + "</p><hr></div>" + document.getElementById("news").innerHTML;
+    document.getElementById("news").innerHTML = "<div><h2>Смерть</h2><p>Убит: " + victim['name'].toString(alphabet) +
+        "<br>Убийца: " + killer['name'].toString(alphabet) + "<br>Всего существ: " + countCreations() + "</p><hr></div>" + document.getElementById("news").innerHTML;
     limitNews();
 }
 
 function broadCastBirth(creation) {
-    document.getElementById("news").innerHTML = "<div><h2>Рождение</h2><p>Имя: " + creation['name'].toString(alphabit) +
-        "<br>Родители: " + creation['parents'][0].toString(alphabit) + ", " + creation['parents'][1].toString(alphabit) + "<br>Зрение: " + creation['eye'] +
+    document.getElementById("news").innerHTML = "<div><h2>Рождение</h2><p>Имя: " + creation['name'].toString(alphabet) +
+        "<br>Родители: " + creation['parents'][0].toString(alphabet) + ", " + creation['parents'][1].toString(alphabet) + "<br>Зрение: " + creation['eye'] +
         "<br>Выносливость: " + creation['endurance'] + "<br>Ген: " + creation['gen'] +
         "<br>Всего существ: " + countCreations() + "</p><hr></div>" + document.getElementById("news").innerHTML;
     limitNews();
@@ -405,8 +410,8 @@ function draw() {
             } else if (area[i][k]['type'] === "point") {
                 html += "<td class='creature creature-leaf'></td>";
             } else {
-                html += "<td class='creature creature" + area[i][k]['skin'] + "' title='" + area[i][k]['name'].toString(alphabit) + "\nРодители: " + area[i][k]['parents'][0].toString(alphabit) + ", " +
-                    area[i][k]['parents'][1].toString(alphabit) + "\nВозраст: " + area[i][k]['age'] + "\nЗрение: " + area[i][k]['eye'] + "\nГолод: " +
+                html += "<td class='creature creature" + area[i][k]['skin'] + "' title='" + area[i][k]['name'].toString(alphabet) + "\nРодители: " + area[i][k]['parents'][0].toString(alphabet) + ", " +
+                    area[i][k]['parents'][1].toString(alphabet) + "\nВозраст: " + area[i][k]['age'] + "\nЗрение: " + area[i][k]['eye'] + "\nГолод: " +
                     area[i][k]['hungry'] + "" + "\nВыносливость: " + area[i][k]['endurance'] + "\nСила: " + area[i][k]['power'] +
                     "\nГен: " + area[i][k]['gen'] + "'><span></span></td>";
             }
