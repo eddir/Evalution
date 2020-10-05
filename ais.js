@@ -371,7 +371,7 @@ function broadCastDeath(killer, victim) {
         killer['points'] + ", " + killer['power'] + ")<br>Всего существ: " + countCreations() + "</p><hr></div>" +
         document.getElementById("news").innerHTML;
 
-    if (countCreations() === 0) {
+    if (countCreations() === 1) {
         gameWin("Не осталось существ");
     }
 
