@@ -1,4 +1,4 @@
-let enabled, width, height, goods_random, spawn_random, news_limit, spawn_limit, period, alphabet, interval, player;
+let enabled, width, height, goods_random, spawn_random, news_limit, spawn_limit, period, alphabet, interval, start_points, player;
 
 let area = [[]], name = 0x1, stat_food = 0, stat_kill = 0;
 
@@ -29,14 +29,15 @@ function tick() {
 }
 
 function startGame() {
-    width = document.getElementById("width").getAttribute("value");
-    height = document.getElementById("height").getAttribute("value");
-    goods_random = document.getElementById("goods_random").getAttribute("value");
-    spawn_random = document.getElementById("spawn_random").getAttribute("value");
-    news_limit = document.getElementById("news_limit").getAttribute("value");
-    spawn_limit = document.getElementById("spawn_limit").getAttribute("value");
-    period = document.getElementById("period").getAttribute("value");
-    alphabet = document.getElementById("alphabet").getAttribute("value");
+    width = document.getElementById("width").value;
+    height = document.getElementById("height").value;
+    goods_random = document.getElementById("goods_random").value;
+    spawn_random = document.getElementById("spawn_random").value;
+    news_limit = document.getElementById("news_limit").value;
+    spawn_limit = document.getElementById("spawn_limit").value;
+    period = document.getElementById("period").value;
+    alphabet = document.getElementById("alphabet").value;
+    start_points = document.getElementById("start_points").value;
 
     document.getElementById("welcome").hidden = true;
     document.getElementById("news_block").classList.remove("hidden");
@@ -56,7 +57,7 @@ function startGame() {
             type: "player",
             status: 3,
             parents: [0, 0],
-            points: 10,
+            points: start_points,
             age: 0,
             eye: 1,
             gen: -1,
@@ -139,6 +140,13 @@ function gameOver(message) {
     modal("<h1>Поражение</h1><h2>" + message + "</h2><p>Возраст: " +
         player['entity']['age'] + "</p><p>Съедено: " + stat_food + "</p><p>Убито: " + stat_kill + "</p>");
 }
+function gameWin(message) {
+    stopGame();
+    document.getElementById("welcome").style.display = 'none';
+    document.getElementById("area").style.display = 'none';
+    modal("<h1>Победа</h1><h2>" + message + "</h2><p>Возраст: " +
+        player['entity']['age'] + "</p><p>Съедено: " + stat_food + "</p><p>Убито: " + stat_kill + "</p>");
+}
 
 function stopGame() {
     clearInterval(interval);
@@ -171,7 +179,7 @@ function spawn() {
             type: "creation",
             status: 3,
             parents: [0, 0],
-            points: 10,
+            points: start_points,
             age: 0,
             eye: 1,
             gen: getRandomInt(10),
@@ -340,7 +348,7 @@ function fighting(x, y, creation) {
 }
 
 function broadCastPlayerEat(points) {
-    popup("+" + points + " очков движения");
+    popup("+" + points + " очков движения. Всего " + player['entity']['points'] + ".");
 }
 
 function broadCastResurrection(creation) {
@@ -356,17 +364,15 @@ function broadCastDeath(killer, victim) {
         gameOver("Вас убили.");
     } else if (killer['type'] === "player") {
         stat_kill++;
-        popup("Убийто существо " + victim['name']);
+        popup("Убийто существо " + victim['name'] + ", очков всего " + player['entity']['points']);
     }
     document.getElementById("news").innerHTML = "<div><h2>Смерть</h2><p>Убит: " + victim['name'] +
-        "<br>Убийца: " + killer['name'] + "<br>Всего существ: " + countCreations() + "</p><hr></div>" + document.getElementById("news").innerHTML;
+        "(" + victim['points'] + ", " + victim['power'] + ")" + "<br>Убийца: " + killer['name'] + "(" +
+        killer['points'] + ", " + killer['power'] + ")<br>Всего существ: " + countCreations() + "</p><hr></div>" +
+        document.getElementById("news").innerHTML;
 
     if (countCreations() === 0) {
-        stopGame();
-        document.getElementById("finish").style.display = 'block';
-        document.getElementById("welcome").style.display = 'none';
-        document.getElementById("area").style.display = 'none';
-        document.getElementById("finish").innerHTML = "<h1>j,tlf</h1><p>Возраст: " + player['entity']['age'] + "</p><p>Съедено: " + stat_food + "</p><p>Убито: " + stat_kill + "</p>";
+        gameWin("Не осталось существ");
     }
 
     limitNews();
@@ -393,8 +399,9 @@ function description(element) {
 
 function modal(message, quit= false) {
     document.getElementById("modal").style.display = 'block';
-    document.getElementById("modal").innerHTML = message +
-        (quit ? "<br><br><a class='button' onclick='document.getElementById(\"modal\").style.display = \"none\"'>Закрыть</a>" : "");
+    document.getElementById("modal").innerHTML = message + "<br><br>" +
+        (quit ? "<a class='button' onclick='document.getElementById(\"modal\").style.display = \"none\"'>Закрыть</a>" :
+        "<a class='button' onclick='location.reload()'>Перезапустить</a>");
 }
 
 function popup(message) {
