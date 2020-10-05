@@ -2,73 +2,21 @@ let enabled, width, height, goods_random, spawn_random, news_limit, spawn_limit,
 
 let area = [[]], name = 0x1, stat_food = 0, stat_kill = 0;
 
-document.addEventListener('keypress', (event) => {
-    let px = player['x'];
-    let py = player['y'];
-    switch (event.code) {
-        case "KeyW": //движение вперёд
-            if (enabled && player['x'] !== 0 && playerMovement(player['x'] - 1, player['y'])) {
-                player['x']--;
-                moveCreation([px, py], [player['x'], player['y']], 1);
-                draw();
-            }
-            break;
-        case "KeyS": //движение назад
-            if (enabled && player['x'] !== height - 1 && playerMovement(player['x'] + 1, player['y'])) {
-                player['x']++;
-                moveCreation([px, py], [player['x'], player['y']], 1);
-                draw();
-            }
-            break;
-        case "KeyA": //движение влево
-            if (enabled && player['y'] !== 0 && playerMovement(player['x'], player['y'] - 1)) {
-                player['y']--;
-                moveCreation([px, py], [player['x'], player['y']], 1);
-                draw();
-            }
-            break;
-        case "KeyD": //движение вправо
-            if (enabled && player['y'] !== width - 1 && playerMovement(player['x'], player['y'] + 1)) {
-                player['y']++;
-                moveCreation([px, py], [player['x'], player['y']], 1);
-                draw();
-            }
-            break;
-        case "KeyP": //пауза\продолжить
-            if (enabled) {
-                stopGame();
-                console.log("Paused");
-            } else {
-                resumeGame();
-                console.log("Resumed");
-            }
-            break;
-        case "KeyF": //тик быстрее
-            if (enabled && period > 100) {
-                period -= 100;
-                clearInterval(interval);
-                interval = setInterval(tick, period);
-                console.log("Changed period to " + period);
-            }
-            break;
-        case "KeyL": //тик медленее
-            if (enabled) {
-                period += 100;
-                clearInterval(interval);
-                interval = setInterval(tick, period);
-                console.log("Changed period to " + period);
-            }
-            break;
-    }
-});
-
-function playerMovement(px, py) {
-    if (area[px][py]['type'] === 'point') {
+function playerMovement(x, y) {
+    if (area[x][y]['type'] === 'point') {
         player['entity']['hungry'] = 0;
         stat_food++;
-        broadCastPlayerEat();
-    } else if (area[px][py]['type'] === 'creation') {
-        return fighting(px, py, player['entity']);
+        let points = getRandomInt(3) + 2;
+        player['entity']['points'] += points;
+        broadCastPlayerEat(points);
+    } else if (area[x][y]['type'] === 'creation') {
+        return fighting(x, y, player['entity']);
+    }
+    if (player['entity']['hungry'] > player['entity']['endurance']) {
+        player['entity']['endurance']++;
+    }
+    if (player['entity']['points'] === 0) {
+        gameOver("Закончились очки движения");
     }
     return true;
 }
@@ -111,7 +59,7 @@ function startGame() {
             points: 10,
             age: 0,
             eye: 1,
-            gen: getRandomInt(10),
+            gen: -1,
             step: 1,
             hungry: 0,
             endurance: 0,
@@ -122,6 +70,74 @@ function startGame() {
     area[player['y']][player['x']] = player['entity'];
 
     resumeGame();
+
+    document.addEventListener('keypress', (event) => {
+        let px = player['x'];
+        let py = player['y'];
+        switch (event.code) {
+            case "KeyW": //движение вперёд
+                if (enabled && player['x'] !== 0 && playerMovement(player['x'] - 1, player['y'])) {
+                    player['x']--;
+                    moveCreation([px, py], [player['x'], player['y']], 1);
+                    draw();
+                }
+                break;
+            case "KeyS": //движение назад
+                if (enabled && player['x'] !== height - 1 && playerMovement(player['x'] + 1, player['y'])) {
+                    player['x']++;
+                    moveCreation([px, py], [player['x'], player['y']], 1);
+                    draw();
+                }
+                break;
+            case "KeyA": //движение влево
+                if (enabled && player['y'] !== 0 && playerMovement(player['x'], player['y'] - 1)) {
+                    player['y']--;
+                    moveCreation([px, py], [player['x'], player['y']], 1);
+                    draw();
+                }
+                break;
+            case "KeyD": //движение вправо
+                if (enabled && player['y'] !== width - 1 && playerMovement(player['x'], player['y'] + 1)) {
+                    player['y']++;
+                    moveCreation([px, py], [player['x'], player['y']], 1);
+                    draw();
+                }
+                break;
+            case "KeyP": //пауза\продолжить
+                if (enabled) {
+                    stopGame();
+                    console.log("Paused");
+                } else {
+                    resumeGame();
+                    console.log("Resumed");
+                }
+                break;
+            case "KeyF": //тик быстрее
+                if (enabled && period > 100) {
+                    period -= 100;
+                    clearInterval(interval);
+                    interval = setInterval(tick, period);
+                    console.log("Changed period to " + period);
+                }
+                break;
+            case "KeyL": //тик медленее
+                if (enabled) {
+                    period += 100;
+                    clearInterval(interval);
+                    interval = setInterval(tick, period);
+                    console.log("Changed period to " + period);
+                }
+                break;
+        }
+    });
+}
+
+function gameOver(message) {
+    stopGame();
+    document.getElementById("welcome").style.display = 'none';
+    document.getElementById("area").style.display = 'none';
+    modal("<h1>Поражение</h1><h2>" + message + "</h2><p>Возраст: " +
+        player['entity']['age'] + "</p><p>Съедено: " + stat_food + "</p><p>Убито: " + stat_kill + "</p>");
 }
 
 function stopGame() {
@@ -172,11 +188,16 @@ function spawn() {
 function steps() {
     let creatures = getCreatures();
     for (let i = 0; i < creatures.length; i++) {
-        doStep(creatures[i][0], creatures[i][1])
+        doStep(creatures[i][0], creatures[i][1]);
     }
 
     player['entity']['age']++;
     player['entity']['hungry']++;
+    if (player['entity']['points'] > 4 && getRandomInt(6) === 1) {
+        player['entity']['power']++;
+        player['entity']['points'] -= 4;
+        popup("Увеличена сила. -4 очки.")
+    }
 }
 
 function doStep(x, y) {
@@ -318,8 +339,8 @@ function fighting(x, y, creation) {
     return false;
 }
 
-function broadCastPlayerEat() {
-    popup("Подобрана пища");
+function broadCastPlayerEat(points) {
+    popup("+" + points + " очков движения");
 }
 
 function broadCastResurrection(creation) {
@@ -332,13 +353,8 @@ function broadCastResurrection(creation) {
 
 function broadCastDeath(killer, victim) {
     if (victim['type'] === "player") {
-        stopGame();
-        document.getElementById("finish").style.display = 'block';
-        document.getElementById("welcome").style.display = 'none';
-        document.getElementById("area").style.display = 'none';
-        document.getElementById("finish").innerHTML = "<h1>Поражение</h1><p>Возраст: " + player['entity']['age'] + "</p><p>Съедено: " + stat_food + "</p><p>Убито: " + stat_kill + "</p>";
-    }
-    else if (killer['type'] === "player") {
+        gameOver("Вас убили.");
+    } else if (killer['type'] === "player") {
         stat_kill++;
         popup("Убийто существо " + victim['name']);
     }
@@ -371,14 +387,22 @@ function limitNews() {
     }
 }
 
+function description(element) {
+    modal(element.getAttribute("title").split("\n").join( "<br>"), true);
+}
+
+function modal(message, quit= false) {
+    document.getElementById("modal").style.display = 'block';
+    document.getElementById("modal").innerHTML = message +
+        (quit ? "<br><br><a class='button' onclick='document.getElementById(\"modal\").style.display = \"none\"'>Закрыть</a>" : "");
+}
+
 function popup(message) {
 
-    let box = document.querySelector('#alert').cloneNode( true );
+    let box = document.querySelector('#alert').cloneNode(true);
     box.removeAttribute("id");
     box.style.display = "block";
     box.childNodes[3].innerText = message;
-    console.log(box);
-    console.log(box.childNodes);
     document.querySelector("body").prepend(box);
 
     setTimeout(function () {
@@ -459,9 +483,9 @@ function draw() {
                 html += "<td class='creature creature-leaf'></td>";
             } else {
                 html += "<td class='creature creature" + area[i][k]['skin'] + "' title='" + area[i][k]['name'] + "\nРодители: " + area[i][k]['parents'][0] + ", " +
-                    area[i][k]['parents'][1] + "\nВозраст: " + area[i][k]['age'] + "\nЗрение: " + area[i][k]['eye'] + "\nГолод: " +
+                    area[i][k]['parents'][1] + "\nВозраст: " + area[i][k]['age'] + "\nОчки: " + area[i][k]['points'] + "\nЗрение: " + area[i][k]['eye'] + "\nГолод: " +
                     area[i][k]['hungry'] + "" + "\nВыносливость: " + area[i][k]['endurance'] + "\nСила: " + area[i][k]['power'] +
-                    "\nГен: " + area[i][k]['gen'] + "'><span></span></td>";
+                    "\nГен: " + area[i][k]['gen'] + "' onclick='description(this)'><span></span></td>";
             }
         }
         html += "</tr>";
