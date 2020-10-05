@@ -142,3 +142,27 @@ td {
 .creature15 {
     background-position: -284px -41px;
 }
+
+.alert {
+    padding: 25px 20px;
+    background-color: #eeda00; /* Red */
+    color: black;
+    margin-bottom: 15px;
+    max-width: 500px;
+    width: 80%;
+    font-size: 22px;
+    position: fixed;
+}
+.closebtn {
+    margin-left: 15px;
+    color: black;
+    font-weight: bold;
+    float: right;
+    font-size: 22px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.closebtn:hover {
+    color: black;
+}

@@ -68,7 +68,6 @@ function playerMovement(px, py) {
         stat_food++;
         broadCastPlayerEat();
     } else if (area[px][py]['type'] === 'creation') {
-        stat_kill++;
         return fighting(px, py, player['entity']);
     }
     return true;
@@ -320,8 +319,7 @@ function fighting(x, y, creation) {
 }
 
 function broadCastPlayerEat() {
-    document.getElementById("news").innerHTML = "<div><h2>Голод устранён</h2><hr></div>" + document.getElementById("news").innerHTML;
-    limitNews();
+    popup("Подобрана пища");
 }
 
 function broadCastResurrection(creation) {
@@ -335,11 +333,14 @@ function broadCastResurrection(creation) {
 function broadCastDeath(killer, victim) {
     if (victim['type'] === "player") {
         stopGame();
-        stat_kill--;
         document.getElementById("finish").style.display = 'block';
         document.getElementById("welcome").style.display = 'none';
         document.getElementById("area").style.display = 'none';
         document.getElementById("finish").innerHTML = "<h1>Поражение</h1><p>Возраст: " + player['entity']['age'] + "</p><p>Съедено: " + stat_food + "</p><p>Убито: " + stat_kill + "</p>";
+    }
+    else if (killer['type'] === "player") {
+        stat_kill++;
+        popup("Убийто существо " + victim['name']);
     }
     document.getElementById("news").innerHTML = "<div><h2>Смерть</h2><p>Убит: " + victim['name'] +
         "<br>Убийца: " + killer['name'] + "<br>Всего существ: " + countCreations() + "</p><hr></div>" + document.getElementById("news").innerHTML;
@@ -368,6 +369,21 @@ function limitNews() {
     while (element.childNodes.length > news_limit) {
         element.removeChild(element.lastChild);
     }
+}
+
+function popup(message) {
+
+    let box = document.querySelector('#alert').cloneNode( true );
+    box.removeAttribute("id");
+    box.style.display = "block";
+    box.childNodes[3].innerText = message;
+    console.log(box);
+    console.log(box.childNodes);
+    document.querySelector("body").prepend(box);
+
+    setTimeout(function () {
+        box.parentNode.removeChild(box);
+    }, 2500);
 }
 
 function countCreations() {
