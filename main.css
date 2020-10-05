@@ -15,14 +15,14 @@ tr {
     height: 35px;
 }
 td {
-    min-width: 43px;
+    min-width: 41px;
 }
 .board, .board th, .board td {
   border: 0;
 }
 .creature {
-    width: 43px;
-    height: 35px;
+    width: 41px;
+    height: 34px;
     background: url(assets/textures.svg) no-repeat 0 0;
     background-size: 324px;
     cursor: pointer;
@@ -40,7 +40,7 @@ td {
     background-position: -162px 0;
 }
 .creature4 {
-    background-position: -203px 0;
+    background-position: -201px 0;
 }
 .creature5 {
     background-position: -240px 0;
